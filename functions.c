@@ -183,18 +183,31 @@ void show(PtList patients)
     char patientID[255];
     fgets(patientID, sizeof(patientID), stdin);
 
-    int size;
-    listSize(patients, &size);
-
     Patient patient;
+    
+    int found = getPatientByID(patients, &patient, patientID);
 
-    for (int i = 0; i < size - 1; i++) {
-        listGet(patients, i, &patient);
-        if (patient.id == atol(patientID)) {
-            printPatient(patient);
+    if (found)
+        printPatient(patient);
+    else
+        puts("Patient not found!\n");
+}
+
+int getPatientByID(PtList patientsList, Patient* patient, char* id)
+{    
+    int found = 0;
+
+    int size;
+    listSize(patientsList, &size);
+
+    for (int i = 0; i < size; i++) {
+        listGet(patientsList, i, patient);
+        if (patient->id == atol(id)) {            
+            found = 1;
             break;
         }
     }
+    return found;
 }
 
 void average(PtList patients)

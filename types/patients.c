@@ -38,21 +38,29 @@ void printPatient(Patient patient)
     printf("ID: %ld\n", patient.id);
     printf("SEX: %s\n", patient.sex);
 
+    printf("AGE: ");
     int age = patientAge(patient);
     if (age != -1)
-        printf("AGE: %d\n", age);
+        printf("%d\n", age);
     else
-        puts("AGE: unknow");
+        puts("unknow");
 
     printf("COUNTRY/REGION: %s / %s\n", patient.country, patient.region);
-    printf("INFECTION REASON: %s\n", patient.infectionReason);
+
+    printf("INFECTION REASON: ");
+    if (patient.infectionReason[0] != '\0')
+        printf("%s\n", patient.infectionReason);
+    else
+        puts("unknow");
+
     printf("STATE: %s\n", patient.status);
 
     int days = patientIllnessDays(patient);
+    printf("NUMBER OF DAYS WITH ILLNESS: ");
     if (days != -1)
-        printf("NUMBER OF DAYS WITH ILLNESS: %d\n", days);
+        printf("%d\n", days);
     else
-        puts("NUMBER OF DAYS WITH ILLNESS: unknow");
+        puts("unknow");
 }
 
 int patientAge(Patient patient)
@@ -97,4 +105,10 @@ int patientIllnessDays(Patient patient)
 
         return dateDaysBetween(patient.confirmedDate, currDate);
     }
+}
+
+void printSingleLinePatient(Patient patient)
+{
+    printf("ID: &ld, ", patient.id);
+    printf("SEX: %s, ", patient.sex);
 }

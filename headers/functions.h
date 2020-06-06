@@ -7,6 +7,8 @@ char** split(char* string, int nFields, const char* delim);
 
 void cleanificator(char** fields);
 
+int getPatientByID(PtList patientsList, Patient* patient, char* id);
+
 // Funções A
 
 PtList loadp();
