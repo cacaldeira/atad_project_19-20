@@ -73,7 +73,7 @@ int main(int argc, char** argv)
             oldest(listPatients);
 
         } else if (equalsStringIgnoreCase(command, "GROWTH")) {
-            printf("Comando GROWTH nao implementado.\n");
+            growth(listPatients);
 
         } else if (equalsStringIgnoreCase(command, "MATRIX")) {
             printf("Comando MATRIX nao implementado.\n");

@@ -2,6 +2,7 @@
 #include "functions.h"
 
 #include <stdlib.h>
+#include <time.h>
 
 Date dateCreate(char* stringDate)
 {
@@ -24,7 +25,6 @@ Date dateCreate(char* stringDate)
     return date;
 }
 
-//https://www.geeksforgeeks.org/find-number-of-days-between-two-given-dates/
 int dateDaysBetween(Date date1, Date date2)
 {
     int d1Days = (date1.year * 365) + date1.day;
@@ -55,4 +55,24 @@ int dateDaysBetween(Date date1, Date date2)
         d2Days += monthDays[i];
 
     return d2Days - d1Days;
+}
+
+Date dateDayBefore(char* inputDate)
+{
+    struct tm dayBefore = { 0 };
+
+    char** fields = split(inputDate, 3, "/");
+
+    dayBefore.tm_mday = atoi(fields[0]);
+    dayBefore.tm_mon = atoi(fields[1]) - 1;
+    dayBefore.tm_year = atoi(fields[2]) - 1900;
+
+    dayBefore.tm_mday--;
+    mktime(&dayBefore);
+
+    char yesterday[11];
+    strftime(yesterday, sizeof(yesterday), "%d/%m/%Y", &dayBefore);
+
+    Date yesterdayDate = dateCreate(yesterday);
+    return yesterdayDate;
 }

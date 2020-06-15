@@ -406,14 +406,15 @@ void follow(PtList patients)
     printf("Following ");
     do {
         found = getPatientByID(patients, &currentPatient, patientID);
-        if (found)
+        if (found) {
             printSingleLinePatient(currentPatient);
-        else {
             printf("contaminated by: ");
+
+        } else
             printf("unknow");
-        }
 
         sprintf(patientID, "%ld", currentPatient.infectedBy);
+
     } while (found);
 }
 
@@ -512,4 +513,20 @@ void oldest(PtList patients)
     }
 
     listDestroy(&oldestList);
+}
+
+void growth(PtList patients)
+{
+    if (patients == NULL) {
+        puts("Empty patient list!\n");
+        return;
+    }
+
+    printf("date> ");
+    char dateInput[255];
+    fgets(dateInput, sizeof(dateInput), stdin);
+
+    Date date = dateCreate(dateInput);
+
+    Date dayBefore = dateDayBefore(dateInput);
 }

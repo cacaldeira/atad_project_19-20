@@ -22,3 +22,4 @@ void printSingleLinePatient(Patient patient);
 void follow(PtList patients);
 void cleanFields(char** fields);
 void oldest(PtList patients);
+void growth(PtList patients);
