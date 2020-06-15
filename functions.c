@@ -621,8 +621,6 @@ void matrix(PtList patients)
     listSize(patients, &size);
     Patient currPatient;
 
-    int count1 = 0, count2 = 0, count3=0;
-
     for (int i = 0; i < size; i++) {
         listGet(patients, i, &currPatient);
 
@@ -651,15 +649,12 @@ void matrix(PtList patients)
         switch (currPatient.status[0]) {
         case 'i':
             statusColumn = 0;
-            count1++;
             break;
         case 'r':
             statusColumn = 1;
-            count2++;
             break;
         case 'd':
             statusColumn = 2;
-            count3++;
             break;
         }
 
@@ -668,16 +663,16 @@ void matrix(PtList patients)
         values[position]++;
     }
 
-    printf("\n%d\n%d\n%d", count1, count2,count3);
-
-    //populate table
-    int countValues = 0;
-    for (int i = 1; i < 8; i++)
+    //populate table    
+    for (int i = 1; i < 8; i++) {
+        int countValues = i - 1;
         for (int j = 1; j < 4; j++) {
             char number[12];
-            sprintf(number, "%d", values[countValues++]);
+            sprintf(number, "%d", values[countValues]);
+            countValues += 7;
             strcpy(table[i][j], number);
         }
+    }
 
     //print
     for (int i = 0; i < 8; i++) {
