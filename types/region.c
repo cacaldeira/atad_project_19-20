@@ -21,6 +21,6 @@ void regionPrint(Region region)
 {
     printf("\nNAME: %s\n", region.name);
     printf("CITY: %s\n", region.city);
-    printf("AREA: %f\n", region.area);
+    printf("AREA: %0.3f\n", region.area);
     printf("POPULATION: %d\n", region.population);
 }

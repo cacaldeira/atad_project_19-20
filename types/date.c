@@ -19,6 +19,8 @@ Date dateCreate(char* stringDate)
         date.year = atoi(fields[2]);
     }
 
+    free(fields);
+
     return date;
 }
 

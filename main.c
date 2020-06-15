@@ -45,13 +45,12 @@ int main(int argc, char** argv)
         if (equalsStringIgnoreCase(command, "QUIT")) {
             quit = 1; /* vai provocar a saída do interpretador */
 
-        } else if (equalsStringIgnoreCase(command, "LOAD")) {
+        } else if (equalsStringIgnoreCase(command, "LOADP")) {
             listPatients = loadp();
 
         } else if (equalsStringIgnoreCase(command, "LOADR")) {
             listRegions = loadr();
-            mapPrint(listRegions);
-
+            
         } else if (equalsStringIgnoreCase(command, "CLEAR")) {
             clear(&listPatients, &listRegions);
 
@@ -59,7 +58,7 @@ int main(int argc, char** argv)
             average(listPatients);
 
         } else if (equalsStringIgnoreCase(command, "FOLLOW")) {
-            printf("Comando FOLLOW nao implementado.\n");
+            follow(listPatients);
 
         } else if (equalsStringIgnoreCase(command, "SEX")) {
             sex(listPatients);
@@ -71,7 +70,7 @@ int main(int argc, char** argv)
             topFive(listPatients);
 
         } else if (equalsStringIgnoreCase(command, "OLDEST")) {
-            printf("Comando OLDEST nao implementado.\n");
+            oldest(listPatients);
 
         } else if (equalsStringIgnoreCase(command, "GROWTH")) {
             printf("Comando GROWTH nao implementado.\n");
@@ -118,7 +117,7 @@ void printCommandsMenu()
     printf(
         "\n======================================================================"
         "=============");
-    printf("\nA. Base Commands (LOAD, LOADR,CLEAR).");
+    printf("\nA. Base Commands (LOADP, LOADR, CLEAR).");
     printf(
         "\nB. Simple Indicators and searchs (AVERAGE, FOLLOW, MATRIX, OLDEST, "
         "RELEASED, SEX, SHOW, TOP5).");

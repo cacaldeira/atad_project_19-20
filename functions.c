@@ -84,16 +84,6 @@ PtList loadp()
 
 PtMap loadr()
 {
-    /* 
-    because setLocale does not work well with my Linux configurations 
-    (even if change my own computer locale) I needed to replace commas 
-    so atof() parses the number correctly from area with decimal places
-    and at the same time remove commas from population because atoi() won't parse them    
-
-    set 'cleanify = 0' to work with the raw data input
-    */
-    int cleanify = 1;
-
     // Abre o ficheiro “regions.csv”
     FILE* file;
     file = fopen("files/regions.csv", "r");
@@ -118,8 +108,7 @@ PtMap loadr()
 
         char** fields = split(line, 4, ";");
 
-        if (cleanify)
-            cleanificator(fields);
+        cleanFields(fields); //removes commas from numeric numbers
 
         Region region = regionCreate(fields[0], fields[1], fields[2], fields[3]);
 
@@ -136,13 +125,14 @@ PtMap loadr()
     return regions;
 }
 
-//special function so I can test stuff on my linux box _ César
-void cleanificator(char** fields)
+void cleanFields(char** fields)
 {
+    // change commas to dots because area is float
     for (int i = 0; i < strlen(fields[2]); i++)
         if (fields[2][i] == ',')
-            fields[2][i] == '.';
+            fields[2][i] = '.';
 
+    // remove commas because atoi does not parse none of that
     char cleanPopulation[strlen(fields[3])];
     int tracker = 0;
     for (int i = 0; i < strlen(fields[3]); i++)
@@ -184,7 +174,7 @@ void show(PtList patients)
     fgets(patientID, sizeof(patientID), stdin);
 
     Patient patient;
-    
+
     int found = getPatientByID(patients, &patient, patientID);
 
     if (found)
@@ -194,7 +184,7 @@ void show(PtList patients)
 }
 
 int getPatientByID(PtList patientsList, Patient* patient, char* id)
-{    
+{
     int found = 0;
 
     int size;
@@ -202,7 +192,7 @@ int getPatientByID(PtList patientsList, Patient* patient, char* id)
 
     for (int i = 0; i < size; i++) {
         listGet(patientsList, i, patient);
-        if (patient->id == atol(id)) {            
+        if (patient->id == atol(id)) {
             found = 1;
             break;
         }
@@ -386,5 +376,140 @@ void topFive(PtList patients)
             break;
     }
 
-    listPrint(topList);
+    // listPrint(topList); shows ranks starting in 0 and we didn't want it
+    for (int i = 0; i < 5; i++) {
+        listGet(topList, i, &currPatient);
+        printPatient(currPatient);
+    }
+    listDestroy(&topList);
+}
+
+void follow(PtList patients)
+{
+    printf("id> ");
+    char patientID[255];
+    fgets(patientID, sizeof(patientID), stdin);
+
+    if (patients == NULL) {
+        puts("Empty patient list!\n");
+        return;
+    }
+
+    Patient currentPatient;
+    int found;
+
+    if (!getPatientByID(patients, &currentPatient, patientID)) {
+        puts("Patient not found!\n");
+        return;
+    }
+
+    printf("Following ");
+    do {
+        found = getPatientByID(patients, &currentPatient, patientID);
+        if (found)
+            printSingleLinePatient(currentPatient);
+        else {
+            printf("contaminated by: ");
+            printf("unknow");
+        }
+
+        sprintf(patientID, "%ld", currentPatient.infectedBy);
+    } while (found);
+}
+
+void oldest(PtList patients)
+{
+    if (patients == NULL) {
+        puts("Empty patient list!\n");
+        return;
+    }
+
+    int size;
+    listSize(patients, &size);
+
+    Patient currPatient;
+    Patient topPatient;
+
+    PtList oldestList = listCreate(5);
+
+    char gender = 'm';
+    int genderLock = 0; //keep searching same gender
+    int counter = 0; //oldest people list counter
+
+    for (int i = 0; i < size; i++) {
+        //pick one
+        listGet(patients, i, &topPatient);
+        int topAge = patientAge(topPatient);
+
+        // check if is valid
+        if (topPatient.birthYear == -1 || topPatient.sex[0] != gender)
+            continue;
+
+        // check if there's any bigger
+        for (int j = i + 1; j < size; j++) {
+            //pick one
+            listGet(patients, j, &currPatient);
+            int currAge = patientAge(currPatient);
+
+            // check if is valid
+            if (currPatient.birthYear == -1 || currPatient.sex[0] != gender)
+                continue;
+
+            // check if current patient is already in list
+            Patient auxPatient;
+            int auxSize;
+            listSize(oldestList, &auxSize);
+            int repeated = 0;
+            for (int k = 0; k < auxSize; k++) {
+                listGet(oldestList, k, &auxPatient);
+                if (currPatient.id == auxPatient.id) {
+                    repeated = 1;
+                    break;
+                }
+            }
+
+            // if existed ignore
+            if (repeated)
+                continue;
+
+            // check if it's bigger
+            if (currAge > topAge) {
+                topPatient = currPatient;
+                topAge = currAge;
+                genderLock = 0;
+            }
+
+            //if someone equals loop same gender again to grab that person
+            if (currAge == topAge)
+                genderLock++;
+        }
+        listAdd(oldestList, counter, topPatient);
+        counter++;
+        genderLock--;
+        if (genderLock <= 0)
+            if (gender == 'm')
+                gender = 'f';
+            else
+                break;
+    }
+
+    //print
+    genderLock = 0; // 0 - males | 1 - females
+    counter = 1; // showned number before patient info
+    listSize(oldestList, &size);
+
+    printf("MALES:\n");
+    for (int i = 0; i < size; i++) {
+        listGet(oldestList, i, &currPatient);
+        if (currPatient.sex[0] == 'f' && genderLock == 0) {
+            printf("\nFEMALES:\n");
+            genderLock = 1;
+            counter = 1;
+        }
+        printf("%d- ", counter);
+        printSingleLinePatient(currPatient);
+        counter++;
+    }
+
+    listDestroy(&oldestList);
 }

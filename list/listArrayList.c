@@ -13,147 +13,171 @@
 #include <stdlib.h>
 
 typedef struct listImpl {
-	ListElem* elements;
-	int size; 
-	int capacity;
+    ListElem* elements;
+    int size;
+    int capacity;
 } ListImpl;
 
+static bool ensureCapacity(PtList list)
+{
+    if (list->size == list->capacity) {
+        int newCapacity = list->capacity * 2;
+        ListElem* newArray = (ListElem*)realloc(list->elements,
+            newCapacity * sizeof(ListElem));
 
-static bool ensureCapacity(PtList list) {
-	if (list->size == list->capacity) {
-		int newCapacity = list->capacity * 2;
-		ListElem* newArray = (ListElem*) realloc( list->elements, 
-								newCapacity * sizeof(ListElem) );
-		
-		if(newArray == NULL) return false;
+        if (newArray == NULL)
+            return false;
 
-		list->elements = newArray;
-		list->capacity = newCapacity;
-	}
-	
-	return true;
+        list->elements = newArray;
+        list->capacity = newCapacity;
+    }
+
+    return true;
 }
 
-PtList listCreate(unsigned int initialCapacity) {
-	PtList list = (PtList)malloc(sizeof(ListImpl));
-	if (list == NULL) return NULL;
+PtList listCreate(unsigned int initialCapacity)
+{
+    PtList list = (PtList)malloc(sizeof(ListImpl));
+    if (list == NULL)
+        return NULL;
 
-	list->elements = (ListElem*)calloc(initialCapacity,
-										sizeof(ListElem));
+    list->elements = (ListElem*)calloc(initialCapacity,
+        sizeof(ListElem));
 
-	if (list->elements == NULL) {
-		free(list);
-		return NULL;	
-	}
+    if (list->elements == NULL) {
+        free(list);
+        return NULL;
+    }
 
-	list->size = 0;
-	list->capacity = initialCapacity;
+    list->size = 0;
+    list->capacity = initialCapacity;
 
-	return list;
+    return list;
 }
 
-int listDestroy(PtList *ptList) {
-	PtList list = *ptList;
-	if (list == NULL) return LIST_NULL;
+int listDestroy(PtList* ptList)
+{
+    PtList list = *ptList;
+    if (list == NULL)
+        return LIST_NULL;
 
-	free(list->elements);
-	free(list);
+    free(list->elements);
+    free(list);
 
-	*ptList = NULL;
+    *ptList = NULL;
 
-	return LIST_OK;
+    return LIST_OK;
 }
 
-int listAdd(PtList list, int rank, ListElem elem) {
-	if (list == NULL) return LIST_NULL;
-	if (rank < 0 || rank > list->size) return LIST_INVALID_RANK;
+int listAdd(PtList list, int rank, ListElem elem)
+{
+    if (list == NULL)
+        return LIST_NULL;
+    if (rank < 0 || rank > list->size)
+        return LIST_INVALID_RANK;
 
-	if(!ensureCapacity(list)) return LIST_FULL;
+    if (!ensureCapacity(list))
+        return LIST_FULL;
 
-	/* make room for new element at index 'rank' */
-	for(int i = list->size; i > rank; i--) {
-		list->elements[i] = list->elements[i-1];
-	}
+    /* make room for new element at index 'rank' */
+    for (int i = list->size; i > rank; i--) {
+        list->elements[i] = list->elements[i - 1];
+    }
 
-	list->elements[rank] = elem;
+    list->elements[rank] = elem;
 
-	list->size++;
+    list->size++;
 
-	return LIST_OK;
+    return LIST_OK;
 }
 
-int listRemove(PtList list, int rank, ListElem *ptElem) {
-	if (list == NULL) return LIST_NULL;
-	if (list->size == 0) return LIST_EMPTY;
-	if (rank < 0 || rank > list->size - 1) return LIST_INVALID_RANK;
+int listRemove(PtList list, int rank, ListElem* ptElem)
+{
+    if (list == NULL)
+        return LIST_NULL;
+    if (list->size == 0)
+        return LIST_EMPTY;
+    if (rank < 0 || rank > list->size - 1)
+        return LIST_INVALID_RANK;
 
-	*ptElem = list->elements[rank];
+    *ptElem = list->elements[rank];
 
-	/* close the gap at this rank */
-	for(int i = rank; i< list->size - 1; i++) {
-		list->elements[i] = list->elements[i+1];
-	}
+    /* close the gap at this rank */
+    for (int i = rank; i < list->size - 1; i++) {
+        list->elements[i] = list->elements[i + 1];
+    }
 
-	list->size--;
+    list->size--;
 
-	return LIST_OK;
+    return LIST_OK;
 }
 
-int listGet(PtList list, int rank, ListElem *ptElem) {
-	if (list == NULL) return LIST_NULL;
-	if (rank < 0 || rank > list->size - 1) return LIST_INVALID_RANK;
+int listGet(PtList list, int rank, ListElem* ptElem)
+{
+    if (list == NULL)
+        return LIST_NULL;
+    if (rank < 0 || rank > list->size - 1)
+        return LIST_INVALID_RANK;
 
-	*ptElem = list->elements[rank];
+    *ptElem = list->elements[rank];
 
-	return LIST_OK;
+    return LIST_OK;
 }
 
-int listSet(PtList list, int rank, ListElem elem, ListElem *ptOldElem) {
-	if (list == NULL) return LIST_NULL;
-	if (rank < 0 || rank > list->size - 1) return LIST_INVALID_RANK;
+int listSet(PtList list, int rank, ListElem elem, ListElem* ptOldElem)
+{
+    if (list == NULL)
+        return LIST_NULL;
+    if (rank < 0 || rank > list->size - 1)
+        return LIST_INVALID_RANK;
 
-	*ptOldElem = list->elements[rank];
+    *ptOldElem = list->elements[rank];
 
-	list->elements[rank] = elem;
+    list->elements[rank] = elem;
 
-	return LIST_OK;
+    return LIST_OK;
 }
 
-int listSize(PtList list, int *ptSize) {
-	if (list == NULL) return LIST_NULL;
+int listSize(PtList list, int* ptSize)
+{
+    if (list == NULL)
+        return LIST_NULL;
 
-	*ptSize = list->size;
+    *ptSize = list->size;
 
-	return LIST_OK;
+    return LIST_OK;
 }
 
-bool listIsEmpty(PtList list) {
-	if (list == NULL) return 1;
+bool listIsEmpty(PtList list)
+{
+    if (list == NULL)
+        return 1;
 
-	return (list->size == 0);
+    return (list->size == 0);
 }
 
-int listClear(PtList list) {
-	if (list == NULL) return LIST_NULL;
+int listClear(PtList list)
+{
+    if (list == NULL)
+        return LIST_NULL;
 
-	list->size = 0;
+    list->size = 0;
 
-	return LIST_OK;
+    return LIST_OK;
 }
-void listPrint(PtList list) {
-	if (list == NULL) {
-		printf("(List NULL)\n");
-	}
-	else if (list->size == 0) {
-		printf("(List EMPTY)\n");
-	}
-	else {
-		printf("List contents (by rank): \n");
-		for(int rank = 0; rank < list->size; rank++) {
-			printf("Rank %d: ", rank);
-			listElemPrint(list->elements[rank]);
-			printf("\n");
-		}
-	}
-	printf("\n");
+void listPrint(PtList list)
+{
+    if (list == NULL) {
+        printf("(List NULL)\n");
+    } else if (list->size == 0) {
+        printf("(List EMPTY)\n");
+    } else {
+        printf("List contents (by rank): \n");
+        for (int rank = 0; rank < list->size; rank++) {
+            printf("Rank %d: ", rank);
+            listElemPrint(list->elements[rank]);
+            printf("\n");
+        }
+    }
+    printf("\n");
 }

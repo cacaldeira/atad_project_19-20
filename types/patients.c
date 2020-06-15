@@ -109,6 +109,15 @@ int patientIllnessDays(Patient patient)
 
 void printSingleLinePatient(Patient patient)
 {
-    printf("ID: &ld, ", patient.id);
+    printf("Patient: ID: %ld, ", patient.id);
     printf("SEX: %s, ", patient.sex);
+    printf("AGE: ");
+    int age = patientAge(patient);
+    if (age != -1)
+        printf("%d, ", age);
+    else
+        puts("unknow, ");
+
+    printf("COUNTRY/REGION: %s / %s,", patient.country, patient.region);
+    printf("STATE: %s\n", patient.status);
 }

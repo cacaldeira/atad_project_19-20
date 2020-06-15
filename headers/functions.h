@@ -18,3 +18,7 @@ void show(PtList patients);
 void average(PtList patients);
 void sex(PtList patients);
 void topFive(PtList patients);
+void printSingleLinePatient(Patient patient);
+void follow(PtList patients);
+void cleanFields(char** fields);
+void oldest(PtList patients);
