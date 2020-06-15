@@ -118,6 +118,6 @@ void printSingleLinePatient(Patient patient)
     else
         puts("unknow, ");
 
-    printf("COUNTRY/REGION: %s / %s,", patient.country, patient.region);
+    printf("COUNTRY/REGION: %s / %s, ", patient.country, patient.region);
     printf("STATE: %s\n", patient.status);
 }

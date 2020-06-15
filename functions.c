@@ -114,8 +114,6 @@ PtMap loadr()
 
         mapPut(regions, region.name, region);
 
-        regionPrint(region);
-
         free(fields);
     }
 
@@ -207,7 +205,7 @@ void average(PtList patients)
         return;
     }
 
-    int avgDeceased = 0, avgReleased = 0, avgIsolated = 0;
+    float avgDeceased = 0, avgReleased = 0, avgIsolated = 0;
     int countDeceased = 0, countReleased = 0, countIsolated = 0;
 
     int size;
@@ -246,9 +244,9 @@ void average(PtList patients)
     avgIsolated /= countIsolated;
 
     puts("Average age of patients:");
-    printf("\tdeceased: %d y.o.\n", avgDeceased);
-    printf("\treleased: %d y.o.\n", avgReleased);
-    printf("\tisolated: %d y.o.\n", avgIsolated);
+    printf("\tdeceased: %0.f y.o.\n", avgDeceased);
+    printf("\treleased: %0.f y.o.\n", avgReleased);
+    printf("\tisolated: %0.f y.o.\n", avgIsolated);
 }
 
 void sex(PtList patients)
@@ -258,7 +256,7 @@ void sex(PtList patients)
         return;
     }
 
-    int countMale = 0, countFemale = 0, countUnknow = 0;
+    float countMale = 0, countFemale = 0, countUnknow = 0;
 
     int size;
     listSize(patients, &size);
@@ -296,9 +294,11 @@ void sex(PtList patients)
     countUnknow /= size;
 
     puts("Percentage gender of patients:");
-    printf("\tmale: %d%%\n", countMale);
-    printf("\tfemale: %d%%\n", countFemale);
-    printf("\tunknow: %d%%\n", countUnknow);
+    printf("\tmale: %0.f%%\n", countMale);
+    printf("\tfemale: %0.f%%\n", countFemale);
+    printf("\tunknow: %0.f%%\n", countUnknow);
+
+    printf("Total of patients: %d\n", size);
 }
 
 void topFive(PtList patients)
@@ -406,12 +406,16 @@ void follow(PtList patients)
     printf("Following ");
     do {
         found = getPatientByID(patients, &currentPatient, patientID);
+
         if (found) {
             printSingleLinePatient(currentPatient);
             printf("contaminated by: ");
-
-        } else
-            printf("unknow");
+        } else {
+            if (patientID[0] == '-')
+                printf("unknow");
+            else
+                printf("%s - does not exist record", patientID);
+        }
 
         sprintf(patientID, "%ld", currentPatient.infectedBy);
 
@@ -526,7 +530,157 @@ void growth(PtList patients)
     char dateInput[255];
     fgets(dateInput, sizeof(dateInput), stdin);
 
-    Date date = dateCreate(dateInput);
+    Date today = dateCreate(dateInput);
 
     Date dayBefore = dateDayBefore(dateInput);
+
+    int todayDead = 0, todayIsolated = 0, beforeDead = 0, beforeInfected = 0;
+
+    int size;
+    listSize(patients, &size);
+    Patient currPatient;
+
+    for (int i = 0; i < size; i++) {
+        listGet(patients, i, &currPatient);
+
+        if (dateIsEqual(currPatient.confirmedDate, today))
+            todayIsolated++;
+        if (dateIsEqual(currPatient.confirmedDate, dayBefore))
+            beforeInfected++;
+
+        if (dateIsEqual(currPatient.deceasedDate, today))
+            todayDead++;
+        if (dateIsEqual(currPatient.deceasedDate, dayBefore))
+            beforeDead++;
+    }
+
+    if (beforeDead == 0 && beforeInfected == 0) {
+        printf("There is no record for ");
+        datePrint(dayBefore);
+    } else {
+        printf("Date: ");
+        datePrint(dayBefore);
+        printf("\tNº infected: %d\n", beforeInfected);
+        printf("\tNº dead: %d\n", beforeDead);
+    }
+
+    if (todayDead == 0 && todayIsolated == 0) {
+        printf("There is no record for ");
+        datePrint(today);
+    } else {
+        printf("\nDate: ");
+        datePrint(today);
+        printf("\tNº infected: %d\n", todayIsolated);
+        printf("\tNº dead: %d\n", todayDead);
+    }
+
+    // We can't calculate growth from zero but in C99 float supports infinity, if we divide by 0 it shows as inf
+    // Since the behavior is not erroneous we decided not to handle that case and let the standard take care of it
+    float rate = todayIsolated - beforeInfected;
+    rate /= beforeInfected;
+    rate *= 100;
+    printf("\nRate of new infected: %.0f%%\n", rate);
+
+    rate = todayDead - beforeDead;
+    rate /= beforeDead;
+    rate *= 100;
+    printf("Rate of new dead: %.0f%%\n", rate);
+}
+
+void matrix(PtList patients)
+{
+
+    if (patients == NULL) {
+        puts("Empty patient list!\n");
+        return;
+    }
+
+    char table[8][4][9] = {
+        { "", "isolated", "released", "deceased" },
+        { "[0-15]", "", "", "" },
+        { "[16-30]", "", "", "" },
+        { "[31-45]", "", "", "" },
+        { "[46-60]", "", "", "" },
+        { "[61-75]", "", "", "" },
+        { "[76...[", "", "", "" },
+        { "unknow", "", "", "" }
+    };
+
+    int values[21] = { 0 };
+    /*
+    0 | 7 | 14
+    1 | 8 | 15
+    2 | 9 | 16
+    3 | 10| 17
+    4 | 11| 18
+    5 | 12| 19
+    6 | 13| 20
+    */
+
+    int size;
+    listSize(patients, &size);
+    Patient currPatient;
+
+    int count1 = 0, count2 = 0, count3=0;
+
+    for (int i = 0; i < size; i++) {
+        listGet(patients, i, &currPatient);
+
+        int age = patientAge(currPatient);
+        int ageCategory; // represents the row in which the age corresponds
+        int statusColumn;
+
+        // get what row the value corresponds
+        if (age == -1)
+            ageCategory = 6; // unknow ages - no birth year
+
+        else if (age <= 15)
+            ageCategory = 0;
+        else if (age <= 30)
+            ageCategory = 1;
+        else if (age <= 45)
+            ageCategory = 2;
+        else if (age <= 60)
+            ageCategory = 3;
+        else if (age <= 75)
+            ageCategory = 4;
+        else
+            ageCategory = 5;
+
+        // get what column the value corresponds
+        switch (currPatient.status[0]) {
+        case 'i':
+            statusColumn = 0;
+            count1++;
+            break;
+        case 'r':
+            statusColumn = 1;
+            count2++;
+            break;
+        case 'd':
+            statusColumn = 2;
+            count3++;
+            break;
+        }
+
+        int position = ageCategory + (7 * statusColumn);
+
+        values[position]++;
+    }
+
+    printf("\n%d\n%d\n%d", count1, count2,count3);
+
+    //populate table
+    int countValues = 0;
+    for (int i = 1; i < 8; i++)
+        for (int j = 1; j < 4; j++) {
+            char number[12];
+            sprintf(number, "%d", values[countValues++]);
+            strcpy(table[i][j], number);
+        }
+
+    //print
+    for (int i = 0; i < 8; i++) {
+        printf("%10s | %10s | %10s | %10s\n", table[i][0], table[i][1], table[i][2], table[i][3]);
+    }
 }

@@ -1,6 +1,7 @@
 #include "date.h"
 #include "functions.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -75,4 +76,14 @@ Date dateDayBefore(char* inputDate)
 
     Date yesterdayDate = dateCreate(yesterday);
     return yesterdayDate;
+}
+
+int dateIsEqual(Date date1, Date date2)
+{
+    return date1.day == date2.day && date1.month == date2.month && date1.year == date2.year;
+}
+
+void datePrint(Date date)
+{
+    printf("%02d/%02d/%d\n", date.day, date.month, date.year);
 }

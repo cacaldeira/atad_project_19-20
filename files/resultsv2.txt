@@ -38,7 +38,8 @@ AGE: 76
 COUNTRY/REGION: Korea /Seul
 INFECTION REASON: Seongdong-gu APT
 STATE: isolated
-NUMBER OF DAYS WITH ILLNESS: unknown
+NUMBER OF DAYS WITH ILLNESS: 47 
+//Nota- valor estimado para o caso de pessoas com no estado isolado o cálculo deve ser realizado com a data mais recente de contaminação encontrada nos registos
 
  
 >TOP5
@@ -102,6 +103,6 @@ Date:<25/02/2020>
 Number of deads: 2:
 Number of infected: 94
 
-Rate of infections: 39%
+Rate of infections: 65%
 Rate of dead: 100%
 

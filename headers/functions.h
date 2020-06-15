@@ -23,3 +23,4 @@ void follow(PtList patients);
 void cleanFields(char** fields);
 void oldest(PtList patients);
 void growth(PtList patients);
+void matrix(PtList patients);

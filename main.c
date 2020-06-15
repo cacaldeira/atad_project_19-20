@@ -76,7 +76,7 @@ int main(int argc, char** argv)
             growth(listPatients);
 
         } else if (equalsStringIgnoreCase(command, "MATRIX")) {
-            printf("Comando MATRIX nao implementado.\n");
+            matrix(listPatients);
 
         } else if (equalsStringIgnoreCase(command, "REGIONS")) {
             printf("Comando REGIONS nao implementado.\n");
@@ -120,7 +120,7 @@ void printCommandsMenu()
     printf("\nA. Base Commands (LOADP, LOADR, CLEAR).");
     printf(
         "\nB. Simple Indicators and searchs (AVERAGE, FOLLOW, MATRIX, OLDEST, "
-        "RELEASED, SEX, SHOW, TOP5).");
+        "GROWTH, SEX, SHOW, TOP5).");
     printf("\nC. Advanced indicator (REGIONS, REPORTS)");
     printf("\nD. Exit (QUIT)\n\n");
     printf("COMMAND> ");
