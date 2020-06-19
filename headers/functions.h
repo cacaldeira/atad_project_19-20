@@ -53,22 +53,26 @@ void sortRegionsAlphabetical(PtMap regions);
 
 /////////////////////////  FUNCTIONS A /////////////////////////
 
-/**
+/** 
  * @brief loads a file of patients into memory
  *  the filename is given by asked user input
  * 
- * if the file is not found prints a warning else: 
- * @return PtList - a list containing the file information divided by patients
+ * if the file is not found prints a warning
+ * if list has values clears it and adds the new info
+ * 
+ * @param patients - populated list is returned by reference
  */
-PtList loadp();
+void loadp(PtList* patients);
 
 /**
- * @brief loads the file of regions into memory
+ * @brief loads the file of regions into memory - regions are sorted alphabetical
  * 
- * if the file is not found prints a warning else:
- * @return PtMap - a map containing region information separated by field region (key)
+ * if the file is not found prints a warning 
+ * if map has values clears it and adds the new info
+ * 
+ * @param mapRegions - populated map is returned by reference
  */
-PtMap loadr();
+void loadr(PtMap* mapRegions);
 
 /**
  * @brief clears and frees the memory from list of patients and regions
@@ -169,7 +173,7 @@ void matrix(PtList patients);
 void report(PtList patients, PtMap regions);
 
 /**
- * @brief prints the regions with active cases
+ * @brief prints the regions with active cases in alphabetical order
  * 
  * @param patients - patient list to search
  * @param regions  - regions to verify 

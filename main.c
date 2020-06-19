@@ -48,10 +48,10 @@ int main(int argc, char** argv)
             quit = 1; /* vai provocar a saída do interpretador */
 
         } else if (equalsStringIgnoreCase(command, "LOADP")) {
-            listPatients = loadp();
+            loadp(&listPatients);
 
         } else if (equalsStringIgnoreCase(command, "LOADR")) {
-            listRegions = loadr();
+            loadr(&listRegions);
 
         } else if (equalsStringIgnoreCase(command, "CLEAR")) {
             clear(&listPatients, &listRegions);

@@ -33,8 +33,11 @@ char** split(char* string, int nFields, const char* delim)
     return tokens;
 }
 
-PtList loadp()
+void loadp(PtList* listPatients)
 {
+    if (listPatients != NULL)
+        listDestroy(listPatients);
+
     // Pede o nome dum ficheiro de pacientes
     printf("file> ");
     char filename[255];
@@ -50,8 +53,8 @@ PtList loadp()
 
     // Se  o  ficheiro  não  puder  ser aberto, escreve File not found e a coleção fica vazia
     if (file == NULL) {
-        puts("File not found\n");
-        return NULL;
+        printf("File not found\n");
+        return;
     }
 
     // Carrega-o em memória
@@ -81,19 +84,22 @@ PtList loadp()
 
     // Mostrando  o  número  de  doentes  importados
     printf("Imported %d lines\n", count + 1);
-    return patients;
+    *listPatients = patients;
 }
 
-PtMap loadr()
+void loadr(PtMap* mapRegions)
 {
+    if (mapRegions != NULL)
+        mapDestroy(mapRegions);
+
     // Abre o ficheiro “regions.csv”
     FILE* file;
     file = fopen("files/regions.csv", "r");
 
     // Se o ficheiro não puder ser aberto, escreve File not found e a coleção respetiva fica vazia.
     if (file == NULL) {
-        puts("File not found");
-        return NULL;
+        printf("File not found\n");
+        return;
     }
 
     // Carrega-o em memória
@@ -123,7 +129,9 @@ PtMap loadr()
 
     // Mostrando o número de regiões importadas
     printf("Imported %d lines\n", count + 1);
-    return regions;
+
+    sortRegionsAlphabetical(regions);
+    *mapRegions = regions;
 }
 
 void cleanFields(char** fields)
@@ -143,7 +151,7 @@ void cleanFields(char** fields)
     strcpy(fields[3], cleanPopulation);
 }
 
-void clear(PtList* patients, PtMap* regions) ///////// TO DO
+void clear(PtList* patients, PtMap* regions)
 {
     int nPatients = 0, nRegions = 0;
 
@@ -767,6 +775,7 @@ void report(PtList patients, PtMap regions)
         fprintf(file, "Found %d cases with %d deceased patients in unknown region!", values[lenMap][0], values[lenMap][1]);
 
     fclose(file);
+    free(regionKeys);
 
     printf("Report created.\n");
 }
@@ -800,8 +809,6 @@ void regions(PtList patients, PtMap regions)
     int lenRegions;
     mapSize(regions, &lenRegions);
 
-    sortRegionsAlphabetical(regions);
-
     String* keys = mapKeys(regions);
 
     int freeRegions[lenRegions]; // 0 - if free | 1 - if active cases
@@ -822,6 +829,8 @@ void regions(PtList patients, PtMap regions)
         if (freeRegions[i])
             printf("\t- %-20s count: %d\n", keys[i], freeRegions[i]);
     }
+
+    free(keys);
 }
 
 void sortRegionsAlphabetical(PtMap regions)
@@ -836,13 +845,12 @@ void sortRegionsAlphabetical(PtMap regions)
         int min = i;
 
         for (int j = i + 1; j < size; j++)
-            if (strcmp(keys[min], keys[j]) > 0) {
+            if (strcmp(keys[j], keys[min]) < 0)
                 min = j;
-                printf("traded %s with %s\n", keys[i], keys[j]);
-            }
+
         String auxKey;
         strcpy(auxKey, keys[min]);
-        
+
         strcpy(keys[min], keys[i]);
         strcpy(keys[i], auxKey);
 
@@ -855,4 +863,7 @@ void sortRegionsAlphabetical(PtMap regions)
     mapClear(regions);
     for (int i = 0; i < size; i++)
         mapPut(regions, keys[i], values[i]);
+
+    free(keys);
+    free(values);
 }
