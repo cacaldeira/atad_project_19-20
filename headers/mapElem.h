@@ -17,9 +17,10 @@
 #pragma once
 
 #include <stdbool.h>
+#include "myString.h"
 
 /** Key type definition. Change according to the use-case. */
-typedef char* MapKey;
+typedef String MapKey;
 
 /** Value type definition. Change according to the use-case. */
 #include "region.h"

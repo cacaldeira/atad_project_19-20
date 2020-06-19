@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-Region* regionCreate(char* name, char* city, char* area, char* population)
+Region regionCreate(char* name, char* city, char* area, char* population)
 {
-    Region* region = malloc(sizeof(Region));
+    Region region;
 
-    strcpy(region->name, name);
-    strcpy(region->city, city);
-    region->area = atof(area);
-    region->population = atoi(population);
+    strcpy(region.name, name);
+    strcpy(region.city, city);
+    region.area = atof(area);
+    region.population = atoi(population);
 
     return region;
 }

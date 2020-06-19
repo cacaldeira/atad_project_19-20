@@ -16,7 +16,7 @@ typedef struct region {
  * @param population - total population of region
  * @return Region* - returns pointer to memory of created region
  */
-Region* regionCreate(char* name, char* city, char* area, char* population);
+Region regionCreate(char* name, char* city, char* area, char* population);
 
 /**
  * @brief prints information of a region

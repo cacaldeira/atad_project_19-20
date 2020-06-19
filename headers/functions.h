@@ -42,7 +42,7 @@ int getPatientByID(PtList patientsList, Patient* patient, char* id);
  * @param length - length of the array
  * @return int - returns index of key or -1 if not found
  */
-int keyToPos(char* key, char** regionKeys, int length);
+int keyToPos(char* key, String* regionKeys, int length);
 
 /**
  * @brief sort map of regions alphabetically 

@@ -6,6 +6,7 @@
 
 #include "list.h"
 #include "map.h"
+#include "myString.h"
 #include "patient.h"
 #include "region.h"
 
@@ -111,9 +112,9 @@ PtMap loadr()
 
         cleanFields(fields); //removes commas from numeric numbers
 
-        Region* region = regionCreate(fields[0], fields[1], fields[2], fields[3]);
+        Region region = regionCreate(fields[0], fields[1], fields[2], fields[3]);
 
-        mapPut(regions, region->name, *region);
+        mapPut(regions, region.name, region);
 
         free(fields);
     }
@@ -149,16 +150,8 @@ void clear(PtList* patients, PtMap* regions) ///////// TO DO
     if (patients != NULL)
         listSize(*patients, &nPatients);
 
-    if (regions != NULL) {
+    if (regions != NULL)
         mapSize(*regions, &nRegions);
-        Region* regionArr = mapValues(*regions);
-
-        for (int i = nRegions; i > 0; i--) {
-            free(&regionArr[i]);
-        }
-
-        free(regionArr);
-    }
 
     listDestroy(patients);
     mapDestroy(regions);
@@ -706,7 +699,7 @@ void report(PtList patients, PtMap regions)
         return;
     }
 
-    char** regionKeys = mapKeys(regions);
+    String* regionKeys = mapKeys(regions);
     int lenMap;
     mapSize(regions, &lenMap);
 
@@ -778,7 +771,7 @@ void report(PtList patients, PtMap regions)
     printf("Report created.\n");
 }
 
-int keyToPos(char* key, char** regionKeys, int length)
+int keyToPos(String key, String* regionKeys, int length)
 {
     for (int i = 0; i < length; i++) {
         if (strcmp(key, regionKeys[i]) == 0)
@@ -809,7 +802,7 @@ void regions(PtList patients, PtMap regions)
 
     sortRegionsAlphabetical(regions);
 
-    char** keys = mapKeys(regions);
+    String* keys = mapKeys(regions);
 
     int freeRegions[lenRegions]; // 0 - if free | 1 - if active cases
     memset(freeRegions, 0, sizeof freeRegions);
@@ -834,7 +827,7 @@ void regions(PtList patients, PtMap regions)
 void sortRegionsAlphabetical(PtMap regions)
 {
     Region* values = mapValues(regions);
-    char** keys = mapKeys(regions);
+    String* keys = mapKeys(regions);
 
     int size;
     mapSize(regions, &size);
@@ -843,13 +836,15 @@ void sortRegionsAlphabetical(PtMap regions)
         int min = i;
 
         for (int j = i + 1; j < size; j++)
-            if (strcmp(keys[i], keys[j]) > 0) { //ordem alfabetica invertida porque está a dar erro se for normal...
+            if (strcmp(keys[min], keys[j]) > 0) {
                 min = j;
                 printf("traded %s with %s\n", keys[i], keys[j]);
             }
-        char* auxKey = keys[min];
-        keys[min] = keys[i];
-        keys[i] = auxKey;
+        String auxKey;
+        strcpy(auxKey, keys[min]);
+        
+        strcpy(keys[min], keys[i]);
+        strcpy(keys[i], auxKey);
 
         Region* region = &values[min];
         values[min] = values[i];
