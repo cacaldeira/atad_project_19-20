@@ -53,7 +53,7 @@ PtList loadp()
         return NULL;
     }
 
-    // Carrega-o em memória,  mostrando  o  número  de  doentes  importados
+    // Carrega-o em memória
     PtList patients = listCreate(100);
     char line[255];
     int count = -2;
@@ -78,6 +78,7 @@ PtList loadp()
 
     fclose(file);
 
+    // Mostrando  o  número  de  doentes  importados
     printf("Imported %d lines\n", count + 1);
     return patients;
 }
@@ -94,7 +95,7 @@ PtMap loadr()
         return NULL;
     }
 
-    // Carrega-o em memória, mostrando o número de regiões importadas
+    // Carrega-o em memória
     PtMap regions = mapCreate(100);
     char line[255];
     int count = -2;
@@ -110,16 +111,17 @@ PtMap loadr()
 
         cleanFields(fields); //removes commas from numeric numbers
 
-        Region region = regionCreate(fields[0], fields[1], fields[2], fields[3]);
+        Region* region = regionCreate(fields[0], fields[1], fields[2], fields[3]);
 
-        mapPut(regions, region.name, region);
+        mapPut(regions, region->name, *region);
 
         free(fields);
     }
 
     fclose(file);
 
-    printf("Imported %d lines", count);
+    // Mostrando o número de regiões importadas
+    printf("Imported %d lines\n", count + 1);
     return regions;
 }
 
@@ -140,15 +142,23 @@ void cleanFields(char** fields)
     strcpy(fields[3], cleanPopulation);
 }
 
-void clear(PtList* patients, PtMap* regions)
+void clear(PtList* patients, PtMap* regions) ///////// TO DO
 {
     int nPatients = 0, nRegions = 0;
 
     if (patients != NULL)
         listSize(*patients, &nPatients);
 
-    if (regions != NULL)
+    if (regions != NULL) {
         mapSize(*regions, &nRegions);
+        Region* regionArr = mapValues(*regions);
+
+        for (int i = nRegions; i > 0; i--) {
+            free(&regionArr[i]);
+        }
+
+        free(regionArr);
+    }
 
     listDestroy(patients);
     mapDestroy(regions);
@@ -608,6 +618,8 @@ void matrix(PtList patients)
 
     int values[21] = { 0 };
     /*
+    how the array is working when being populated
+
     0 | 7 | 14
     1 | 8 | 15
     2 | 9 | 16
@@ -663,7 +675,7 @@ void matrix(PtList patients)
         values[position]++;
     }
 
-    //populate table    
+    //populate table
     for (int i = 1; i < 8; i++) {
         int countValues = i - 1;
         for (int j = 1; j < 4; j++) {
@@ -678,4 +690,174 @@ void matrix(PtList patients)
     for (int i = 0; i < 8; i++) {
         printf("%10s | %10s | %10s | %10s\n", table[i][0], table[i][1], table[i][2], table[i][3]);
     }
+
+    // could probably print directly the values in the right place but this approach seemed simpler
+}
+
+void report(PtList patients, PtMap regions)
+{
+    if (patients == NULL) {
+        puts("Empty patient list!\n");
+        return;
+    }
+
+    if (regions == NULL) {
+        puts("Empty region list!\n");
+        return;
+    }
+
+    char** regionKeys = mapKeys(regions);
+    int lenMap;
+    mapSize(regions, &lenMap);
+
+    int lenPatients;
+    listSize(patients, &lenPatients);
+
+    int values[lenMap + 1][2]; // 0 - total count of patients | 1 - deaths
+    // len + 1 = patients that might have unknown regions
+    memset(values, 0, sizeof values);
+
+    // separate patients by region
+    Patient currPatient;
+    for (int i = 0; i < lenPatients; i++) {
+        listGet(patients, i, &currPatient);
+        int isDeceased = currPatient.status[0] == 'd' ? 1 : 0;
+
+        int position = keyToPos(currPatient.region, regionKeys, lenMap);
+
+        if (position == -1) {
+            values[lenMap][0]++;
+            if (isDeceased)
+                values[lenMap][1]++;
+
+        } else {
+            values[position][0]++;
+            if (isDeceased)
+                values[position][1]++;
+        }
+    }
+
+    // saving in file
+
+    FILE* file = fopen("report.txt", "w");
+    if (file == NULL) {
+        printf("Report not created.\n");
+        return;
+    }
+
+    for (int i = 0; i < lenMap; i++) {
+        fprintf(file, "REGION: %-20s", regionKeys[i]);
+
+        Region region;
+        int population = mapGet(regions, regionKeys[i], &region);
+
+        float lethality = 0, mortality = 0, incident = 0;
+
+        if (values[i][0]) { // if there's no cases we can't apply any calculation
+
+            lethality = (float)values[i][1] / values[i][0];
+            lethality *= 100;
+
+            mortality = (float)values[i][1] / region.population;
+            mortality *= 10000;
+
+            incident = (float)values[i][0] / region.population;
+            incident *= 100;
+        }
+
+        fprintf(file, "    Mortality: %7.3f%%", mortality);
+        fprintf(file, "    Lethality: %7.3f%%", lethality);
+        fprintf(file, "    Incident Rate: %7.3f%%\n", incident);
+    }
+
+    if (values[lenMap][0]) // in case some patients have unknow region notify the user about it - this should never happen
+        fprintf(file, "Found %d cases with %d deceased patients in unknown region!", values[lenMap][0], values[lenMap][1]);
+
+    fclose(file);
+
+    printf("Report created.\n");
+}
+
+int keyToPos(char* key, char** regionKeys, int length)
+{
+    for (int i = 0; i < length; i++) {
+        if (strcmp(key, regionKeys[i]) == 0)
+            return i;
+    }
+
+    return -1;
+}
+
+void regions(PtList patients, PtMap regions)
+{
+
+    if (patients == NULL) {
+        puts("Empty patient list!\n");
+        return;
+    }
+
+    if (regions == NULL) {
+        puts("Empty region list!\n");
+        return;
+    }
+
+    int lenPatients;
+    listSize(patients, &lenPatients);
+
+    int lenRegions;
+    mapSize(regions, &lenRegions);
+
+    sortRegionsAlphabetical(regions);
+
+    char** keys = mapKeys(regions);
+
+    int freeRegions[lenRegions]; // 0 - if free | 1 - if active cases
+    memset(freeRegions, 0, sizeof freeRegions);
+
+    for (int i = 0; i < lenPatients; i++) { // mark regions with infected patients
+        Patient currPatient;
+        listGet(patients, i, &currPatient);
+
+        if (currPatient.status[0] == 'i') {
+            int position = keyToPos(currPatient.region, keys, lenRegions);
+            freeRegions[position]++;
+        }
+    }
+
+    printf("INFECTED REGIONS:\n");
+    for (int i = 0; i < lenRegions; i++) { //shows infected regions (extra: shows the amount too)
+        if (freeRegions[i])
+            printf("\t- %-20s count: %d\n", keys[i], freeRegions[i]);
+    }
+}
+
+void sortRegionsAlphabetical(PtMap regions)
+{
+    Region* values = mapValues(regions);
+    char** keys = mapKeys(regions);
+
+    int size;
+    mapSize(regions, &size);
+
+    for (int i = 0; i < size; i++) {
+        int min = i;
+
+        for (int j = i + 1; j < size; j++)
+            if (strcmp(keys[i], keys[j]) > 0) { //ordem alfabetica invertida porque está a dar erro se for normal...
+                min = j;
+                printf("traded %s with %s\n", keys[i], keys[j]);
+            }
+        char* auxKey = keys[min];
+        keys[min] = keys[i];
+        keys[i] = auxKey;
+
+        Region* region = &values[min];
+        values[min] = values[i];
+        values[i] = *region;
+    }
+
+    // repopulate the map in alphabetical order
+    mapClear(regions);
+    for (int i = 0; i < size; i++)
+        mapPut(regions, keys[i], values[i]);
 }

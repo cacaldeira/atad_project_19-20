@@ -80,7 +80,7 @@ int patientAge(Patient patient)
 int patientIllnessDays(Patient patient)
 {
     if (patient.confirmedDate.day == 0
-        || (patient.deceasedDate.day == 0 && patient.releasedDate.day == 0))
+        || (patient.deceasedDate.day == 0 && patient.releasedDate.day == 0 && patient.status[0] != 'i'))
         return -1;
 
     switch (patient.status[0]) {

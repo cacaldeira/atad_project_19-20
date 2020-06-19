@@ -1,8 +1,14 @@
 {
     "files.associations": {
-        "algorithm": "c"
+        "algorithm": "c",
+        "array": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utility": "c"
     },
     "cSpell.words": [
-        "Comando"
+        "Comando",
+        "loadp",
+        "loadr"
     ]
 }

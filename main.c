@@ -12,7 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "functions.h" //está a trazer o include do list.h e do map.h também
+#include "functions.h"
+#include "list.h"
+#include "map.h"
 
 typedef char String[255];
 
@@ -50,7 +52,7 @@ int main(int argc, char** argv)
 
         } else if (equalsStringIgnoreCase(command, "LOADR")) {
             listRegions = loadr();
-            
+
         } else if (equalsStringIgnoreCase(command, "CLEAR")) {
             clear(&listPatients, &listRegions);
 
@@ -79,10 +81,10 @@ int main(int argc, char** argv)
             matrix(listPatients);
 
         } else if (equalsStringIgnoreCase(command, "REGIONS")) {
-            printf("Comando REGIONS nao implementado.\n");
+            regions(listPatients, listRegions);
 
         } else if (equalsStringIgnoreCase(command, "REPORT")) {
-            printf("Comando REPORT nao implementado.\n");
+            report(listPatients, listRegions);
 
         } else {
             printf("%s : Comando não encontrado.\n", command);
@@ -121,7 +123,7 @@ void printCommandsMenu()
     printf(
         "\nB. Simple Indicators and searchs (AVERAGE, FOLLOW, MATRIX, OLDEST, "
         "GROWTH, SEX, SHOW, TOP5).");
-    printf("\nC. Advanced indicator (REGIONS, REPORTS)");
+    printf("\nC. Advanced indicator (REGIONS, REPORT)");
     printf("\nD. Exit (QUIT)\n\n");
     printf("COMMAND> ");
 }
